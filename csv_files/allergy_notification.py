@@ -184,7 +184,7 @@ def diagnose() -> int:
 def run():
     require_config("NEIS_API_KEY", NEIS_KEY)
     require_config("RESEND_API_KEY", RESEND_API_KEY)
-    require_config("RESEND_FROM_EMAIL", RESEND_FROM_EMAIL)
+    #require_config("RESEND_FROM_EMAIL", RESEND_FROM_EMAIL)
 
     date = get_target_date()
     print(f"\n[{datetime.now():%Y-%m-%d %H:%M}] 알레르기 알림 시작 - 대상: {date}")
