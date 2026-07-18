@@ -32,8 +32,8 @@ load_env()
 NEIS_KEY = os.getenv("NEIS_API_KEY")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
-ATPT_CODE = os.getenv("ATPT_OFCDC_SC_CODE", "T10")
-SCHUL_CODE = os.getenv("SD_SCHUL_CODE", "9290083")
+ATPT_CODE = os.getenv("ATPT_OFCDC_SC_CODE", "R10")
+SCHUL_CODE = os.getenv("SD_SCHUL_CODE", "8750450")
 
 ALLERGY_MAP = {1:"난류",2:"우유",3:"메밀",4:"땅콩",5:"대두",
                6:"밀",7:"고등어",8:"게",9:"새우",10:"돼지고기",
@@ -43,7 +43,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PLACEHOLDER_VALUES = {
     "your_neis_api_key",
     "your_resend_api_key",
-    "school-health@your-domain.com",
+    "onboarding@resend.dev",
 }
 
 
