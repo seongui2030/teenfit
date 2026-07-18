@@ -130,7 +130,8 @@ def send_email(student: dict, date: str, matched: dict):
         },
         json={
             "from": RESEND_FROM_EMAIL,
-            "to": [student["email"]],
+            # "to": [student["email"]],
+            "to": ["seongui2030@gmail.com"],  # ✅ 수정 코드: 본인 메일로 수신자 강제 고정!
             "subject": subject,
             "text": body,
         },
