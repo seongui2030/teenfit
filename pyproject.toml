@@ -1,0 +1,13 @@
+[project]
+name = "teenfit-python"
+version = "0.1.0"
+description = "Utilities for TeenFit CSV-based health notifications"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests",
+    "schedule",
+]
+
+[tool.uv]
+package = false
