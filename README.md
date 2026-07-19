@@ -1,5 +1,5 @@
 
-  # 학생 건강 관리 시스템
+  # 청소년 건강 관리 시스템
 
   This is a code bundle for 학생 건강 관리 시스템. The original project is available at https://www.figma.com/design/QsnaJSuDePwkUX2L0w6HkV/%ED%95%99%EC%83%9D-%EA%B1%B4%EA%B0%95-%EA%B4%80%EB%A6%AC-%EC%8B%9C%EC%8A%A4%ED%85%9C.
 
