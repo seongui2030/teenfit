@@ -118,8 +118,8 @@ from email.mime.multipart import MIMEMultipart
 NEIS_KEY   = os.getenv("NEIS_API_KEY")
 SMTP_USER  = os.getenv("SMTP_USER")
 SMTP_PASS  = os.getenv("SMTP_PASS")
-ATPT_CODE  = "T10"      # 충남교육청
-SCHUL_CODE = "9290083"  # 성의고등학교
+ATPT_CODE  = "R10"      # 경교육청
+SCHUL_CODE = "8750450"  # 성의고등학교
 
 ALLERGY_MAP = {1:"난류",2:"우유",3:"메밀",4:"땅콩",5:"대두",
                6:"밀",7:"고등어",8:"게",9:"새우",10:"돼지고기",
@@ -556,7 +556,7 @@ export default function App() {
               <Database size={14} className="text-slate-500"/>
               <span className="text-xs font-semibold text-slate-500">나이스 API 연동</span>
             </div>
-            <p className="text-[10px] text-slate-400 font-mono break-all">https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=T10&SD_SCHUL_CODE=9290083</p>
+            <p className="text-[10px] text-slate-400 font-mono break-all">https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=R10&SD_SCHUL_CODE=8750450</p>
             <div className="mt-2 flex gap-2">
               <Badge text="성의고등학교" color="navy"/>
               <Badge text="매일 07:00 자동발송" color="green"/>
@@ -1129,7 +1129,7 @@ export default function App() {
 
                 <div className="pt-4 text-center">
                   <p className="text-[10px] text-slate-400">나이스 교육정보 개방 포털 연동</p>
-                  <p className="text-[10px] text-slate-400">성의고등학교 · 충남 T10 · 9290083</p>
+                  <p className="text-[10px] text-slate-400">성의고등학교 · 경북 R10 · 8750450</p>
                 </div>
               </div>
             </div>
