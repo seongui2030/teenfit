@@ -216,8 +216,8 @@ const ENV_CONTENT = `# 성의고등학교 건강관리 시스템 환경변수
 NEIS_API_KEY=2a7478927ad3465aa8631f4c3beb48c6
 
 # 학교 코드 (성의고등학교)
-ATPT_OFCDC_SC_CODE=T10
-SD_SCHUL_CODE=9290083
+ATPT_OFCDC_SC_CODE=R10
+SD_SCHUL_CODE=8750450
 
 # OpenAI ChatGPT API 키
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -428,8 +428,8 @@ export default function App() {
           <div className="mx-4 bg-white rounded-2xl p-4 shadow-sm">
             <p className="text-sm font-semibold text-slate-700 mb-3">건강 관리팀</p>
             {[
-              { role:"보건교사", name:"김보건", phone:"041-555-0001" },
-              { role:"담임교사", name:"이지영", phone:"041-555-0002" },
+              { role:"보건교사", name:"김보건", phone:"054-555-0001" },
+              { role:"담임교사", name:"이지영", phone:"054-555-0002" },
             ].map((t,i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b last:border-b-0 border-slate-50">
                 <div>
@@ -795,8 +795,8 @@ export default function App() {
 
           <div className="mx-4 bg-white rounded-2xl shadow-sm overflow-hidden">
             {[
-              { label:"이메일",   value:"ljy@sungui.hs.kr", icon:Mail },
-              { label:"전화",    value:"041-555-1234",      icon:Phone },
+              { label:"이메일",   value:"ljh@seongui.hs.kr", icon:Mail },
+              { label:"전화",    value:"054-555-1234",      icon:Phone },
             ].map((row,i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 border-slate-50">
                 <row.icon size={16} className="text-slate-400"/>
@@ -1001,8 +1001,8 @@ export default function App() {
             </div>
             {[
               { label:"API 키",        value:"2a7478927ad3465aa8631f4c3beb48c6" },
-              { label:"교육청 코드",    value:"T10 (충남)" },
-              { label:"학교 코드",      value:"9290083 (성의고)" },
+              { label:"교육청 코드",    value:"R10 (경북)" },
+              { label:"학교 코드",      value:"8750450 (성의고)" },
               { label:"알림 발송 시간", value:"매일 07:00 자동" },
             ].map((row,i) => (
               <div key={i} className="flex items-start justify-between py-2 border-b last:border-b-0 border-slate-50">
