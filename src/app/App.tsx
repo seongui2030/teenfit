@@ -1147,10 +1147,12 @@ export default function App() {
         {/* Screen */}
         <div className="absolute inset-[4px] rounded-[47px] overflow-hidden bg-background flex flex-col">
           {/* Dynamic Island */}
+          <!
           <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-50 flex items-center justify-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"/>
             <div className="w-1 h-1 rounded-full bg-slate-700"/>
           </div>
+          -->
 
           {/* Status bar */}
           <div className="h-12 flex-shrink-0" style={{ background: role ? "linear-gradient(135deg,#1e3a6e,#2d5299)" : "#f0f4f8" }}>
