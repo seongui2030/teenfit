@@ -118,7 +118,7 @@ from email.mime.multipart import MIMEMultipart
 NEIS_KEY   = os.getenv("NEIS_API_KEY")
 SMTP_USER  = os.getenv("SMTP_USER")
 SMTP_PASS  = os.getenv("SMTP_PASS")
-ATPT_CODE  = "R10"      # 경기도교육청
+ATPT_CODE  = "R10"      # 경상북도교육청
 SCHUL_CODE = "8750450"  # 성의고등학교
 
 ALLERGY_MAP = {1:"난류",2:"우유",3:"메밀",4:"땅콩",5:"대두",
@@ -246,7 +246,7 @@ NEIS_API_KEY=2a7478927ad3465aa8631f4c3beb48c6
 
 # 학교 코드 (성의고등학교)
 ATPT_OFCDC_SC_CODE=T10
-SD_SCHUL_CODE=9290083
+SD_SCHUL_CODE=8750450
 
 # OpenAI ChatGPT API 키
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
