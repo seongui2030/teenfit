@@ -1179,7 +1179,7 @@ export default function App() {
               </div>
 
               <div className="flex-1 px-6 py-6 space-y-3 bg-slate-50">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-center">역할 선택</p>
+                {/* <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest text-center">역할 선택</p> */}
                 {([
                   { role:"student" as Role, label:"학생 로그인",  desc:"건강정보 & BMI 확인", icon:User,     color:"#1e3a6e" },
                   { role:"teacher" as Role, label:"교사 로그인",  desc:"학생 건강관리 대시보드", icon:BookOpen, color:"#00b894" },
