@@ -74,6 +74,60 @@ const MEAL_ITEMS = [
   { name:"복숭아",         codes:[11] },
 ];
 
+const TODAY_WEATHER = {
+  location: "김천시",
+  summary: "구름조금",
+  tempC: 29.7,
+  humidity: 70,
+  windMps: 1.0,
+};
+
+const AI_EXERCISE_RECOMMENDATIONS = [
+  {
+    id: "squat",
+    name: "스쿼트 인터벌",
+    durationMin: 9,
+    focus: "하체 근지구력",
+    reason: "기온 29.7도에서도 교실/체육관에서 5~10분 내 수행 가능",
+  },
+  {
+    id: "lunge",
+    name: "런지 밸런스 루틴",
+    durationMin: 6,
+    focus: "코어 + 균형감",
+    reason: "바람이 약한 날(1.0m/s)에도 실내 보강운동으로 안전하게 진행 가능",
+  },
+] as const;
+
+const buildPoseCoachingSnippet = (exerciseId: "squat" | "lunge") => {
+  const exerciseName = exerciseId === "squat" ? "스쿼트" : "런지";
+  return `# MediaPipe Pose 기반 ${exerciseName} 코칭 실행 예시
+# 1) 의존성 설치: pip install opencv-python mediapipe numpy
+# 2) 실행: python csv_files/mediapipe_pose_coaching.py --exercise ${exerciseId}
+
+import cv2
+import mediapipe as mp
+
+pose = mp.solutions.pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ok, frame = cap.read()
+    if not ok:
+        break
+
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    result = pose.process(rgb)
+    if result.pose_landmarks:
+        # 어깨-엉덩이-무릎 각도/무릎-발목 정렬을 계산해 자세 피드백
+        pass
+
+    cv2.imshow("${exerciseName} Pose Coaching", frame)
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+`;
+};
+
 // ─── STATS ────────────────────────────────────────────────────────────────────
 const STATS = { total: 500, allergy: STUDENTS.filter(s=>s.allergyCodes.length>0).length, disease: STUDENTS.filter(s=>s.disease).length };
 const MY_CLASS = STUDENTS.filter(s=>s.grade===1&&s.cls===1);
@@ -118,44 +172,16 @@ from email.mime.multipart import MIMEMultipart
 NEIS_KEY   = os.getenv("NEIS_API_KEY")
 SMTP_USER  = os.getenv("SMTP_USER")
 SMTP_PASS  = os.getenv("SMTP_PASS")
-ATPT_CODE  = "R10"      # 경상북도교육청
-SCHUL_CODE = "8750450"  # 성의고등학교
+ATPT_CODE  = "T10"      # 충남교육청
+SCHUL_CODE = "9290083"  # 성의고등학교
 
 ALLERGY_MAP = {1:"난류",2:"우유",3:"메밀",4:"땅콩",5:"대두",
                6:"밀",7:"고등어",8:"게",9:"새우",10:"돼지고기",
                11:"복숭아",12:"토마토",13:"아황산염"}
 
-def get_today_date():
-    """오늘 날짜 반환 (YYYYMMDD)"""
-    return datetime.now().strftime("%Y%m%d")
-
 def get_target_date():
-    """오늘 + 2일 날짜 계산 (알레르기 알림용)"""
+    """오늘 + 2일 날짜 계산 (MLSV_FROM_YMD 파라미터용)"""
     return (datetime.now() + timedelta(days=2)).strftime("%Y%m%d")
-
-def fetch_today_meal() -> dict:
-    """오늘 중식 메뉴와 칼로리를 나이스 API에서 조회"""
-    today = get_today_date()
-    rows = fetch_meal(today)
-    if not rows:
-        return {"date": today, "dishes": [], "calories": "정보 없음"}
-
-    row = rows[0]
-    raw = row.get("DDISH_NM", "").replace("<br/>", "\\n")
-    dishes = [re.sub(r"\\s*\\([^)]*\\)", "", d).strip()
-              for d in raw.split("\\n") if d.strip()]
-    cal = row.get("CAL_INFO", "").replace("Kcal", "kcal").strip()
-
-    return {"date": today, "dishes": dishes, "calories": cal}
-
-def print_today_meal():
-    """오늘 급식 메뉴를 콘솔에 출력"""
-    info = fetch_today_meal()
-    date = info["date"]
-    print(f"\\n[{date[:4]}.{date[4:6]}.{date[6:]}] 오늘의 중식 메뉴")
-    for dish in info["dishes"]:
-        print(f"  • {dish}")
-    print(f"  총 칼로리: {info['calories']}\\n")
 
 def fetch_meal(date: str) -> list:
     """나이스 OPEN API 급식 메뉴 조회"""
@@ -230,8 +256,7 @@ schedule.every().day.at("07:00").do(run)
 if __name__ == "__main__":
     print("성의고등학교 알레르기 알림 서비스 시작")
     print("매일 오전 07:00에 알림을 발송합니다.\\n")
-    print_today_meal()  # 시작 시 오늘 급식 출력
-    run()               # 시작 시 알레르기 알림 즉시 1회 실행
+    run()  # 시작 시 즉시 1회 실행
     while True:
         schedule.run_pending()
         time.sleep(60)
@@ -246,7 +271,7 @@ NEIS_API_KEY=2a7478927ad3465aa8631f4c3beb48c6
 
 # 학교 코드 (성의고등학교)
 ATPT_OFCDC_SC_CODE=T10
-SD_SCHUL_CODE=8750450
+SD_SCHUL_CODE=9290083
 
 # OpenAI ChatGPT API 키
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -321,44 +346,9 @@ export default function App() {
   const [loginPw, setLoginPw]     = useState("");
   const [showLoginPw, setShowLoginPw] = useState(false);
   const [loginRole, setLoginRole] = useState<Role|null>(null);
-  const [mealOpen, setMealOpen]   = useState(false);
-  const [todayMeal, setTodayMeal] = useState<{ dishes: string[]; calories: string; dateLabel: string } | null>(null);
-  const [mealLoading, setMealLoading] = useState(true);
+  const [selectedCoachingExercise, setSelectedCoachingExercise] = useState<"squat" | "lunge" | null>(null);
   const touchStart = useRef(0);
   const scrollRef  = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-    const dateLabel = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
-
-    fetch(
-      `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=2a7478927ad3465aa8631f4c3beb48c6&Type=json&ATPT_OFCDC_SC_CODE=R10&SD_SCHUL_CODE=8750450&MLSV_FROM_YMD=${dateStr}&MLSV_TO_YMD=${dateStr}&MMEAL_SC_CODE=2`
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const row = data?.mealServiceDietInfo?.[1]?.row?.[0];
-        if (row) {
-          const dishes = row.DDISH_NM.replace(/<br\/>/g, "\n")
-            .split("\n")
-            .map((d: string) => d.replace(/\s*\([^)]*\)/g, "").trim())
-            .filter((d: string) => d);
-          const calories = row.CAL_INFO?.replace("Kcal", "kcal").trim() ?? "";
-          setTodayMeal({ dishes, calories, dateLabel });
-        } else {
-          setTodayMeal({ dishes: ["급식 정보 없음"], calories: "-", dateLabel });
-        }
-      })
-      .catch(() => {
-        setTodayMeal({
-          dishes: ["잡곡밥","된장찌개","돈까스","군만두/쫄면","깍두기","우유","복숭아"],
-          calories: "842.0 kcal",
-          dateLabel,
-        });
-      })
-      .finally(() => setMealLoading(false));
-  }, []);
 
   const DEMO = { student: STUDENTS[0], bmi: getBMI(STUDENTS[0].id) };
   const DEMO_BMI_INFO = getBMIInfo(DEMO.bmi);
@@ -566,36 +556,89 @@ export default function App() {
       // Tab 2: 급식/알레르기
       if (tab === 2) return (
         <div className="space-y-3 pb-4">
-          <div className="mx-4 bg-white rounded-2xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock size={14} className="text-slate-400"/>
-              <span className="text-xs text-slate-400">나이스 API · 오늘+2일 예정</span>
-            </div>
-            <h3 className="text-sm font-semibold text-slate-700">{MEAL_TARGET} 중식 예정</h3>
-            <div className="mt-3 space-y-2">
-              {MEAL_ITEMS.map((item,i) => {
-                const hasMyAllergy = item.codes.some(c=>myAllergy.includes(c));
-                return (
-                  <div key={i} className={`flex items-start gap-2 p-2 rounded-lg ${hasMyAllergy?"bg-orange-50 border border-orange-100":""}`}>
-                    {hasMyAllergy && <AlertTriangle size={13} className="text-orange-500 mt-0.5 flex-shrink-0"/>}
-                    {!hasMyAllergy && <div className="w-[13px]"/>}
-                    <div className="flex-1">
-                      <span className={`text-xs font-medium ${hasMyAllergy?"text-orange-700":"text-slate-700"}`}>{item.name}</span>
-                      {item.codes.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {item.codes.map(c => (
-                            <span key={c} className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${myAllergy.includes(c)?"bg-orange-200 text-orange-700":"bg-slate-100 text-slate-500"}`}>
-                              {c}.{ALLERGY[c]}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+          <details className="mx-4 bg-white rounded-2xl p-4 shadow-sm" open>
+            <summary className="list-none cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] text-slate-400 mb-1">나이스 API · 오늘+2일 예정</p>
+                  <h3 className="text-sm font-semibold text-slate-700">오늘의 중식 메뉴</h3>
+                </div>
+                <ChevronRight size={16} className="text-slate-400"/>
+              </div>
+            </summary>
+            <div className="mt-3 border-t border-slate-100 pt-3">
+              <p className="text-xs text-slate-500 mb-2">{MEAL_TARGET} 중식 예정</p>
+              <div className="space-y-2">
+                {MEAL_ITEMS.map((item,i) => {
+                  const hasMyAllergy = item.codes.some(c=>myAllergy.includes(c));
+                  return (
+                    <div key={i} className={`flex items-start gap-2 p-2 rounded-lg ${hasMyAllergy?"bg-orange-50 border border-orange-100":""}`}>
+                      {hasMyAllergy && <AlertTriangle size={13} className="text-orange-500 mt-0.5 flex-shrink-0"/>}
+                      {!hasMyAllergy && <div className="w-[13px]"/>}
+                      <div className="flex-1">
+                        <span className={`text-xs font-medium ${hasMyAllergy?"text-orange-700":"text-slate-700"}`}>{item.name}</span>
+                        {item.codes.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item.codes.map(c => (
+                              <span key={c} className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${myAllergy.includes(c)?"bg-orange-200 text-orange-700":"bg-slate-100 text-slate-500"}`}>
+                                {c}.{ALLERGY[c]}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </details>
+
+          <details className="mx-4 bg-white rounded-2xl p-4 shadow-sm" open>
+            <summary className="list-none cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] text-slate-400 mb-1">OpenWeatherMap · 실내 추천 모드</p>
+                  <h3 className="text-sm font-semibold text-slate-700">AI가 추천하는 오늘의 운동 코칭</h3>
+                </div>
+                <ChevronRight size={16} className="text-slate-400"/>
+              </div>
+            </summary>
+            <div className="mt-3 border-t border-slate-100 pt-3 space-y-3">
+              <div className="rounded-xl bg-blue-50 border border-blue-100 px-3 py-2">
+                <p className="text-xs font-semibold text-blue-800">오늘 날씨: {TODAY_WEATHER.location} · {TODAY_WEATHER.summary}</p>
+                <p className="text-[11px] text-blue-700 mt-0.5">
+                  기온 {TODAY_WEATHER.tempC}도 · 습도 {TODAY_WEATHER.humidity}% · 풍속 {TODAY_WEATHER.windMps}m/s
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2">
+                {AI_EXERCISE_RECOMMENDATIONS.map((exercise) => (
+                  <button
+                    key={exercise.id}
+                    onClick={() => setSelectedCoachingExercise(exercise.id)}
+                    className="text-left rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 hover:bg-emerald-100 transition-colors"
+                  >
+                    <p className="text-xs font-semibold text-emerald-800">{exercise.name} · {exercise.durationMin}분</p>
+                    <p className="text-[11px] text-emerald-700 mt-0.5">초점: {exercise.focus}</p>
+                    <p className="text-[10px] text-emerald-700/90 mt-1">추천 이유: {exercise.reason}</p>
+                  </button>
+                ))}
+              </div>
+
+              {selectedCoachingExercise && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-2">
+                    선택한 운동: {selectedCoachingExercise === "squat" ? "스쿼트 인터벌" : "런지 밸런스 루틴"}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mb-2">MediaPipe 기반 자세 코칭 코드</p>
+                  <pre className="text-[10px] leading-relaxed text-slate-700 whitespace-pre-wrap overflow-x-auto">
+                    {buildPoseCoachingSnippet(selectedCoachingExercise)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </details>
 
           {/* 내 알레르기 목록 */}
           <div className="mx-4 bg-white rounded-2xl p-4 shadow-sm">
@@ -1145,22 +1188,17 @@ export default function App() {
         </div>
 
         {/* Screen */}
-           <div className="absolute inset-[4px] rounded-[47px] overflow-hidden bg-background flex flex-col">
+        <div className="absolute inset-[4px] rounded-[47px] overflow-hidden bg-background flex flex-col">
           {/* Dynamic Island */}
-          /* {role && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-50 flex items-center justify-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"/>
-              <div className="w-1 h-1 rounded-full bg-slate-700"/>
-            </div>
-          )}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-50 flex items-center justify-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"/>
+            <div className="w-1 h-1 rounded-full bg-slate-700"/>
+          </div>
 
           {/* Status bar */}
-          <div
-            className={role ? "h-12 flex-shrink-0" : "h-0 flex-shrink-0 overflow-hidden"}
-            style={role ? { background:"linear-gradient(135deg,#1e3a6e,#2d5299)" } : undefined}
-          >
+          <div className="h-12 flex-shrink-0" style={{ background: role ? "linear-gradient(135deg,#1e3a6e,#2d5299)" : "#f0f4f8" }}>
             {role && <StatusBar/>}
-          </div> */
+          </div>
 
           {/* LOGIN SCREEN */}
           {!role && !loginRole && (
@@ -1197,65 +1235,9 @@ export default function App() {
                   </button>
                 ))}
 
-                {/* 오늘의 중식 메뉴 — 아코디언 */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                  {/* 헤더 (항상 표시) */}
-                  <button
-                    onClick={() => setMealOpen((o) => !o)}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
-                        <Utensils size={13} className="text-emerald-500"/>
-                      </div>
-                      <span className="text-xs font-semibold text-slate-700">오늘의 중식 메뉴</span>
-                      {mealLoading && (
-                        <span className="text-[10px] text-slate-400 animate-pulse">불러오는 중…</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {todayMeal && !mealOpen && (
-                        <span className="text-[10px] font-semibold text-emerald-600">{todayMeal.calories}</span>
-                      )}
-                      <span className="text-[10px] text-slate-400">{todayMeal?.dateLabel ?? ""}</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14" height="14" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" strokeWidth="2.5"
-                        strokeLinecap="round" strokeLinejoin="round"
-                        className={`text-slate-400 transition-transform duration-200 ${mealOpen ? "rotate-180" : ""}`}
-                      >
-                        <polyline points="6 9 12 15 18 9"/>
-                      </svg>
-                    </div>
-                  </button>
-
-                  {/* 펼침 영역 */}
-                  {mealOpen && todayMeal && (
-                    <div className="px-4 pb-3 border-t border-slate-50">
-                      {/* 메뉴 — 가로 나열 */}
-                      <div className="flex flex-wrap gap-1.5 pt-3 pb-2">
-                        {todayMeal.dishes.map((dish, i) => (
-                          <span
-                            key={i}
-                            className="text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full"
-                          >
-                            {dish}
-                          </span>
-                        ))}
-                      </div>
-                      {/* 총 칼로리 — 한 줄 */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-1">
-                        <span className="text-[10px] text-slate-400">나이스 API 연동 · 오늘 중식</span>
-                        <span className="text-sm font-bold text-emerald-600">{todayMeal.calories}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-2 text-center">
+                <div className="pt-4 text-center">
                   <p className="text-[10px] text-slate-400">나이스 교육정보 개방 포털 연동</p>
-                  <p className="text-[10px] text-slate-400">성의고등학교 · R10 · 8750450</p>
+                  <p className="text-[10px] text-slate-400">성의고등학교 · 충남 T10 · 9290083</p>
                 </div>
               </div>
             </div>
